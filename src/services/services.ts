@@ -3,6 +3,7 @@ import { Base64Decoded } from "../types/types";
 import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
 if (!geminiApiKey) {
@@ -30,20 +31,34 @@ export const generateTemporaryImageURL = async (
     imageFormat = match[1];
   }
   const fileName = `${uuidv4()}.${imageFormat}`;
-
-  const tempDir = path.join(__dirname, "temp_images");
+  const tempDir = path.join(__dirname);
 
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
   }
 
   const imageBuffer = Buffer.from(base64Image.inlineData.data, "base64");
-
   const filePath = path.join(tempDir, fileName);
 
   await fs.promises.writeFile(filePath, imageBuffer);
 
-  const imageUrl = `${filePath}`;
+  const response = await axios.post(
+    "https://www.imghippo.com/v1/upload",
+    {
+      api_key: "BSesh7v0uExvYl24aGkFKsGm3bdsRbNV",
+      file: fs.createReadStream(filePath),
+    },
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
 
-  return imageUrl;
+  if (response.data.success) {
+    fs.unlinkSync(filePath);
+    return response.data.data.url;
+  } else {
+    throw new Error("Upload falhou, verifique a resposta da API.");
+  }
 };
