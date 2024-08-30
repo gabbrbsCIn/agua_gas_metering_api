@@ -7,7 +7,6 @@ import axios from "axios";
 import { Customer, PrismaClient } from "@prisma/client";
 import { ConflictError } from "../errors/errors";
 
-
 const prisma = new PrismaClient();
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
@@ -84,7 +83,6 @@ export const createCustomer = async (customer_code: string) => {
       data: {
         customer_code: customer_code,
       },
-      
     });
     return customer;
   }
@@ -92,7 +90,6 @@ export const createCustomer = async (customer_code: string) => {
 };
 
 export const createMeasure = async (measureData: MeasureDataBaseInsert) => {
-  console.log(measureData);
   const measure = await prisma.measure.create({
     data: measureData,
     select: {
@@ -104,5 +101,26 @@ export const createMeasure = async (measureData: MeasureDataBaseInsert) => {
   return measure;
 };
 
+export const checkMeasureInCurrentMonth = async (
+  measureDatetime: string,
+  customerCode: string,
+  measureType: string
+) => {
+  const monthOfMeasure = measureDatetime.slice(0, 7);
 
+  const isMeasureMonthExists = await prisma.measure.findFirst({
+    where: {
+      customer_code: customerCode,
+      measure_type: measureType,
+      measure_datetime: {
+        startsWith: monthOfMeasure,
+      },
+    },
+  });
 
+  if (isMeasureMonthExists) {
+    throw new ConflictError("DOUBLE_REPORT", "Leitura do mês já realizada");
+  }
+
+  return isMeasureMonthExists;
+};
