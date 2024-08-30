@@ -5,5 +5,6 @@ import { Controllers } from "../controllers/controllers";
 const router = express.Router();
 
 router.post("/upload", Controllers.upload);
+router.patch("/confirm", Controllers.confirm);
 
 export { router };
