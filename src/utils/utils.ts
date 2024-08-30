@@ -1,6 +1,10 @@
 import { Request } from "express";
-import { BadRequestError } from "../errors/errors";
-import { Base64Decoded, MeasureData } from "../types/types";
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from "../errors/errors";
+import { Base64Decoded, ConfirmRequestData, UploadRequestData } from "../types/types";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -21,14 +25,7 @@ export const validateBase64Format = (base64Image: string) => {
   return true;
 };
 
-// {
-//     "customer_code": "string",
-//     "measure_datetime": "datetime",
-//     "measure_type": "WATER",
-//     "image": "base64"
-// }
-
-export const isReqBodyEmpty = (measureData: MeasureData): boolean => {
+export const isUploadReqBodyEmpty = (measureData: UploadRequestData): boolean => {
   if (
     !measureData.image ||
     !measureData.customer_code ||
@@ -63,18 +60,20 @@ export const validateMeasure_Type = (measure_type: string): boolean => {
   return true;
 };
 
-export const validateRequest = (req: Request): MeasureData => {
+export const validateUpdateRequest = (req: Request): UploadRequestData => {
   const { image, customer_code, measure_datetime, measure_type } = req.body;
 
   const measureData = { image, customer_code, measure_datetime, measure_type };
 
-  isReqBodyEmpty(measureData);
+  isUploadReqBodyEmpty(measureData);
   validateMeasure_Datetime(measure_datetime);
   validateMeasure_Type(measure_type);
   validateBase64Format(image);
 
   return measureData;
 };
+
+
 
 export const extractBase64FromHeader = (base64Image: string): Base64Decoded => {
   if (!base64Image.startsWith("data:")) {
@@ -90,7 +89,7 @@ export const extractBase64FromHeader = (base64Image: string): Base64Decoded => {
     if (!extractedMimeType) {
       extractedMimeType = "image/jpeg";
     }
-
+    
     return {
       inlineData: {
         data: base64,
@@ -98,4 +97,19 @@ export const extractBase64FromHeader = (base64Image: string): Base64Decoded => {
       },
     };
   }
+};
+
+
+export const isConfirmReqBodyEmpty = (measureData: ConfirmRequestData): boolean => {
+  if (!measureData.measure_uuid || !measureData.confirmed_value){
+    throw new BadRequestError("INVALID_DATA", "Measure_Type é inválido")
+  }
+  return false
+};
+
+export const validateConfirmRequest = (req: Request) => {
+  const { measure_uuid, confirmed_value } = req.body;
+  const measureData = { measure_uuid, confirmed_value};
+  isConfirmReqBodyEmpty(measureData);
+  return measureData;
 };
