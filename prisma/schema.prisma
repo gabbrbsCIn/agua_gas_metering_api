@@ -21,17 +21,13 @@ model Customer {
 
 model Measure {
   measure_uuid      String    @id @default(uuid())
-  measure_datetime DateTime
-  measure_type      MeasureType
+  measure_datetime  String
+  measure_type      String
   has_confirmed     Boolean
   image_url         String
   customer_code     String
+  measure_value     Int
   customer          Customer  @relation(fields: [customer_code], references: [customer_code])
 
   @@index([customer_code])
-}
-
-enum MeasureType {
-  WATER
-  GAS
 }
