@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.post("/upload", Controllers.upload);
 router.patch("/confirm", Controllers.confirm);
+router.get("/:customer_code/list", Controllers.list);
 
 export { router };

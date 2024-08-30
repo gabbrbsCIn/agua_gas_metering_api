@@ -4,10 +4,13 @@ import {
   ConflictError,
   NotFoundError,
 } from "../errors/errors";
-import { Base64Decoded, ConfirmRequestData, UploadRequestData } from "../types/types";
-import { PrismaClient } from "@prisma/client";
+import {
+  Base64Decoded,
+  ConfirmRequestData,
+  UploadRequestData,
+} from "../types/types";
+import { checkCustomerCode } from "../services/services";
 
-const prisma = new PrismaClient();
 
 export const validateBase64Format = (base64Image: string) => {
   let base64Regex = /[A-Za-z0-9+/]+={0,2}$/;
@@ -25,7 +28,9 @@ export const validateBase64Format = (base64Image: string) => {
   return true;
 };
 
-export const isUploadReqBodyEmpty = (measureData: UploadRequestData): boolean => {
+export const isUploadReqBodyEmpty = (
+  measureData: UploadRequestData
+): boolean => {
   if (
     !measureData.image ||
     !measureData.customer_code ||
@@ -49,31 +54,29 @@ export const validateMeasure_Datetime = (measure_datetime: string): boolean => {
   }
   return true;
 };
-export const validateMeasure_Type = (measure_type: string): boolean => {
+export const validateMeasureType = (measure_type: string): boolean => {
   const validMeasureTypes = ["water", "gas"];
   const isMeasureTypesValid = validMeasureTypes.includes(
     measure_type.toLowerCase()
   );
+
   if (!isMeasureTypesValid) {
-    throw new BadRequestError("INVALID_DATA", "Measure_Type é inválido");
+    throw new BadRequestError("INVALID_TYPE", "Tipo de medição não permitida");
   }
   return true;
 };
 
-export const validateUpdateRequest = (req: Request): UploadRequestData => {
+export const validateUploadRequest = (req: Request): UploadRequestData => {
   const { image, customer_code, measure_datetime, measure_type } = req.body;
 
   const measureData = { image, customer_code, measure_datetime, measure_type };
 
   isUploadReqBodyEmpty(measureData);
   validateMeasure_Datetime(measure_datetime);
-  validateMeasure_Type(measure_type);
   validateBase64Format(image);
 
   return measureData;
 };
-
-
 
 export const extractBase64FromHeader = (base64Image: string): Base64Decoded => {
   if (!base64Image.startsWith("data:")) {
@@ -89,7 +92,7 @@ export const extractBase64FromHeader = (base64Image: string): Base64Decoded => {
     if (!extractedMimeType) {
       extractedMimeType = "image/jpeg";
     }
-    
+
     return {
       inlineData: {
         data: base64,
@@ -99,17 +102,31 @@ export const extractBase64FromHeader = (base64Image: string): Base64Decoded => {
   }
 };
 
-
-export const isConfirmReqBodyEmpty = (measureData: ConfirmRequestData): boolean => {
-  if (!measureData.measure_uuid || !measureData.confirmed_value){
-    throw new BadRequestError("INVALID_DATA", "Measure_Type é inválido")
+export const isConfirmReqBodyEmpty = (
+  measureData: ConfirmRequestData
+): boolean => {
+  if (!measureData.measure_uuid || !measureData.confirmed_value) {
+    throw new BadRequestError("INVALID_DATA", "Measure_Type é inválido");
   }
-  return false
+  return false;
 };
 
 export const validateConfirmRequest = (req: Request) => {
   const { measure_uuid, confirmed_value } = req.body;
-  const measureData = { measure_uuid, confirmed_value};
+  const measureData = { measure_uuid, confirmed_value };
   isConfirmReqBodyEmpty(measureData);
   return measureData;
+};
+
+export const validateListRequest = async (req: Request) => {
+  let measureType = req.query.measure_type;
+  const customerCode = req.params.customer_code;
+
+
+  if (measureType) {
+    validateMeasureType(String(measureType));
+    await checkCustomerCode(customerCode);
+  }
+  const data = { customerCode, measureType };
+  return data;
 };
