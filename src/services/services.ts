@@ -1,9 +1,14 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Base64Decoded } from "../types/types";
+import { Base64Decoded, MeasureDataBaseInsert } from "../types/types";
 import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import { Customer, PrismaClient } from "@prisma/client";
+import { ConflictError } from "../errors/errors";
+
+
+const prisma = new PrismaClient();
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
 if (!geminiApiKey) {
@@ -19,7 +24,7 @@ export const generateMeasureValue = async (base64Image: Base64Decoded) => {
 
   const result = await model.generateContent([prompt, base64Image]);
 
-  return result;
+  return parseInt(result.response.text());
 };
 
 export const generateTemporaryImageURL = async (
@@ -62,3 +67,42 @@ export const generateTemporaryImageURL = async (
     throw new Error("Upload falhou, verifique a resposta da API.");
   }
 };
+
+export const findCustomerCode = async (customer_code: string) => {
+  const getCustomer = await prisma.customer.findUnique({
+    where: {
+      customer_code: customer_code,
+    },
+  });
+  return getCustomer;
+};
+
+export const createCustomer = async (customer_code: string) => {
+  const isCustomerCodeExists = await findCustomerCode(customer_code);
+  if (!isCustomerCodeExists) {
+    const customer = await prisma.customer.create({
+      data: {
+        customer_code: customer_code,
+      },
+      
+    });
+    return customer;
+  }
+  return customer_code;
+};
+
+export const createMeasure = async (measureData: MeasureDataBaseInsert) => {
+  console.log(measureData);
+  const measure = await prisma.measure.create({
+    data: measureData,
+    select: {
+      image_url: true,
+      measure_value: true,
+      measure_uuid: true,
+    },
+  });
+  return measure;
+};
+
+
+
