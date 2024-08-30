@@ -125,7 +125,9 @@ export const checkMeasureInCurrentMonth = async (
   return isMeasureMonthExists;
 };
 
-export const checkMeasureUuid = async (measureUuid: string): Promise<string> => {
+export const checkMeasureUuid = async (
+  measureUuid: string
+): Promise<string> => {
   const measure = await prisma.measure.findUnique({
     where: {
       measure_uuid: measureUuid,
@@ -153,8 +155,10 @@ export const checkValueHasConfirmedByUuid = async (measureUuid: string) => {
   return measure;
 };
 
-
-export const updateMeasureValue = async (confirmedValue: number, measureUuid: string) => {
+export const updateMeasureValue = async (
+  confirmedValue: number,
+  measureUuid: string
+) => {
   const measure = await prisma.measure.update({
     where: {
       measure_uuid: measureUuid,
@@ -162,8 +166,59 @@ export const updateMeasureValue = async (confirmedValue: number, measureUuid: st
     data: {
       measure_value: confirmedValue,
       has_confirmed: true,
-    }
-  })
+    },
+  });
 
   return measure;
-}
+};
+
+export const checkCustomerCode = async (customerCode: string) => {
+  const customer = await prisma.customer.findFirst({
+    where: {
+      customer_code: customerCode,
+    },
+  });
+
+  if (!customer) {
+    throw new NotFoundError("MEASURES_NOT_FOUND", "Nenhuma leitura encontrada");
+  }
+
+  return customer;
+};
+
+export const getAllMeasuresByCustomerCode = async (
+  customerCode: string,
+  measureType: string
+) => {
+  if (measureType == "") {
+    const measures = await prisma.measure.findMany({
+      where: {
+        customer_code: customerCode,
+      },
+      select : {
+        measure_uuid: true,
+        measure_datetime: true,
+        measure_type: true,
+        has_confirmed: true,
+        image_url: true,
+      }
+    });
+    return {"customer_code": customerCode, "measures": measures};
+  } else if (measureType) {
+    const measures = await prisma.measure.findMany({
+      where: {
+        customer_code: customerCode,
+        measure_type: measureType,
+      },
+      select : {
+        measure_uuid: true,
+        measure_datetime: true,
+        measure_type: true,
+        has_confirmed: true,
+        image_url: true,
+      }
+    });
+  return {"customer_code": customerCode, "measures": measures};
+  }
+};
+
