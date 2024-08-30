@@ -1,0 +1,35 @@
+{
+  "name": "agua_gas_metering_api",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000a\u0000g\u0000u\u0000a\u0000_\u0000g\u0000a\u0000s\u0000_\u0000m\u0000e\u0000t\u0000e\u0000r\u0000i\u0000n\u0000g\u0000_\u0000a\u0000p\u0000i\u0000\r\u0000 \u0000",
+  "main": "index.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/vision": "^4.3.2",
+    "@google/generative-ai": "^0.17.1",
+    "@prisma/client": "^5.19.0",
+    "axios": "^1.7.5",
+    "buffer": "^6.0.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "form-data": "^4.0.0",
+    "nodemon": "^3.1.4",
+    "prisma": "^5.19.0",
+    "sharp": "^0.33.5",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/uuid": "^10.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.4"
+  }
+}
