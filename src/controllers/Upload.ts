@@ -7,7 +7,7 @@ import {
   generateMeasureValue,
   generateTemporaryImageURL,
 } from "../services/services";
-import { extractBase64FromHeader, validateUpdateRequest } from "../utils/utils";
+import { extractBase64FromHeader, validateUploadRequest } from "../utils/utils";
 import {
   BadRequestError,
   ConflictError,
@@ -16,7 +16,7 @@ import {
 
 export const upload = async (req: Request, res: Response) => {
   try {
-    const measureData = validateUpdateRequest(req);
+    const measureData = validateUploadRequest(req);
 
     const imagebase64Decoded = extractBase64FromHeader(measureData.image);
 
@@ -37,7 +37,7 @@ export const upload = async (req: Request, res: Response) => {
       image_url: image_url,
       customer_code: measureData.customer_code,
       measure_value: measure_value,
-      measure_type: measureData.measure_type,
+      measure_type: measureData.measure_type.toUpperCase(),
     });
     
     res.send(measure).status(200);
