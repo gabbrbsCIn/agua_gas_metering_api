@@ -7,10 +7,19 @@ type Base64Decoded = {
   inlineData: InlineData;
 };
 interface MeasureData {
-    image: string;
-    customer_code: string;
-    measure_datetime: string;
-    measure_type: string;
-  }
+  image: string;
+  customer_code: string;
+  measure_datetime: string;
+  measure_type: string;
+}
 
-export { Base64Decoded, InlineData, MeasureData };
+interface MeasureDataBaseInsert {
+  measure_datetime: string;
+  measure_type: string;
+  has_confirmed: boolean;
+  image_url: string;
+  measure_value: number;
+  customer_code: string;
+}
+
+export { Base64Decoded, InlineData, MeasureData, MeasureDataBaseInsert };
