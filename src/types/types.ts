@@ -6,7 +6,7 @@ type InlineData = {
 type Base64Decoded = {
   inlineData: InlineData;
 };
-interface MeasureData {
+interface UploadRequestData {
   image: string;
   customer_code: string;
   measure_datetime: string;
@@ -22,4 +22,15 @@ interface MeasureDataBaseInsert {
   customer_code: string;
 }
 
-export { Base64Decoded, InlineData, MeasureData, MeasureDataBaseInsert };
+interface ConfirmRequestData {
+  measure_uuid: string;
+  confirmed_value: number;
+}
+
+export {
+  Base64Decoded,
+  InlineData,
+  UploadRequestData,
+  MeasureDataBaseInsert,
+  ConfirmRequestData,
+};
