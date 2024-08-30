@@ -4,8 +4,8 @@ import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { Customer, PrismaClient } from "@prisma/client";
-import { ConflictError } from "../errors/errors";
+import { PrismaClient } from "@prisma/client";
+import { ConflictError, NotFoundError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
@@ -124,3 +124,46 @@ export const checkMeasureInCurrentMonth = async (
 
   return isMeasureMonthExists;
 };
+
+export const checkMeasureUuid = async (measureUuid: string): Promise<string> => {
+  const measure = await prisma.measure.findUnique({
+    where: {
+      measure_uuid: measureUuid,
+    },
+  });
+  if (!measure) {
+    throw new NotFoundError("MEASURE_NOT_FOUND", "Leitura do mês já realizada");
+  }
+  return measure.measure_uuid;
+};
+
+export const checkValueHasConfirmedByUuid = async (measureUuid: string) => {
+  const measure = await prisma.measure.findUnique({
+    where: {
+      measure_uuid: measureUuid,
+      has_confirmed: true,
+    },
+  });
+  if (measure) {
+    throw new ConflictError(
+      "CONFIRMATION_DUPLICATE",
+      "Leitura do mês já realizada"
+    );
+  }
+  return measure;
+};
+
+
+export const updateMeasureValue = async (confirmedValue: number, measureUuid: string) => {
+  const measure = await prisma.measure.update({
+    where: {
+      measure_uuid: measureUuid,
+    },
+    data: {
+      measure_value: confirmedValue,
+      has_confirmed: true,
+    }
+  })
+
+  return measure;
+}
