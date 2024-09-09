@@ -5,31 +5,29 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x", "windows"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:KvdDcWyFHlbDKxzeeHYoEpdVKxYidAQp@junction.proxy.rlwy.net:54188/railway"
+  url      = "postgresql://postgres:jegrOCSCKRFtWphpNoYmsGgwgtnLbXwE@autorack.proxy.rlwy.net:55697/railway"
 }
 
-// Por motivos de requisitos do teste, a URL do banco de dados não foi colocada no arquivo .env (que seria o método de conexãos mais seguro)
 
 model Customer {
-  customer_code String    @id @unique
+  customer_code String   @id @unique
   measures      Measure[]
 }
 
 model Measure {
-  measure_uuid     String   @id @default(uuid())
-  measure_datetime String
-  measure_type     String
-  has_confirmed    Boolean
-  image_url        String
-  customer_code    String
-  measure_value    Int
-  customer         Customer @relation(fields: [customer_code], references: [customer_code])
+  measure_uuid      String    @id @default(uuid())
+  measure_datetime  String
+  measure_type      String
+  has_confirmed     Boolean
+  image_url         String
+  customer_code     String
+  measure_value     Int
+  customer          Customer  @relation(fields: [customer_code], references: [customer_code])
 
   @@index([customer_code])
 }
