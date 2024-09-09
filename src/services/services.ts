@@ -203,6 +203,9 @@ export const getAllMeasuresByCustomerCode = async (
         image_url: true,
       }
     });
+    if (measures.length === 0) {
+      throw new NotFoundError("MEASURES_NOT_FOUND", "Nenhuma leitura encontrada");
+    }
     return {"customer_code": customerCode, "measures": measures};
   } else if (measureType) {
     const measures = await prisma.measure.findMany({
@@ -218,6 +221,9 @@ export const getAllMeasuresByCustomerCode = async (
         image_url: true,
       }
     });
+    if (measures.length === 0) {
+      throw new NotFoundError("MEASURES_NOT_FOUND", "Nenhuma leitura encontrada");
+    }
   return {"customer_code": customerCode, "measures": measures};
   }
 };
