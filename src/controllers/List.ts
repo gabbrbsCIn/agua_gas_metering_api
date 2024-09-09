@@ -10,7 +10,6 @@ import { getAllMeasuresByCustomerCode } from "../services/services";
 export const list = async (req: Request, res: Response) => {
   try {
     const data = await validateListRequest(req);
-
     if (data.measureType) {
       const measures = await getAllMeasuresByCustomerCode(
         data.customerCode,
