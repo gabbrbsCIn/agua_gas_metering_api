@@ -20,7 +20,7 @@ export const confirm = async (req: Request, res: Response) => {
 
     await updateMeasureValue(measureData.confirmed_value, measureUuid);
 
-    res.send({ sucess: true }).status(200);
+    res.send({ success: true }).status(200);
   } catch (err) {
     if (
       err instanceof BadRequestError ||
